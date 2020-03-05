@@ -11,7 +11,7 @@ int main(void)
 
 
     // TODO: Declare the variables that main uses to interact with your state machine.
-    unsigned char history = 0xff;
+    unsigned char button_update = 0xff;
 
     // Stops the Watchdog timer.
     initBoard();
@@ -38,7 +38,7 @@ int main(void)
         // YOU MUST WRITE timer0expired IN myTimer.c
          if(timer0Expired())
          {
-              count0 = (count0+1)%8;
+              count0++;
          }
 
 
@@ -47,17 +47,17 @@ int main(void)
 
          if(timer1Expired())
          {
-             history = (history << 1) | checkStatus_BoosterpackS1();
+             button_update = (button_update << 1) | checkStatus_BoosterpackS1();
          }
         // TODO: Call the button state machine function to check for a completed, debounced button press.
         // YOU MUST WRITE THIS FUNCTION BELOW.
-         bool check = fsmBoosterpackButtonS1(history);
+         bool button_call = fsmBoosterpackButtonS1(button_update);
 
 
         // TODO: If a completed, debounced button press has occurred, increment count1.
-   if(check)
+   if(button_call)
        {
-       count1 = (count1+1)%8;
+       count1++;
        }
  }
 }
@@ -71,45 +71,45 @@ void initBoard()
 // Since count is an unsigned integer, you can mask the value in some way.
 void changeLaunchpadLED2(unsigned int count0)
 {
-    switch (count0)
+    switch ((count0)%8)
     {
     case 0:
-        turnOn_LaunchpadLED2Red();
+        turnOn_LaunchpadLED2Red();   // Red led on
         turnOff_LaunchpadLED2Blue();
         turnOff_LaunchpadLED2Green();
         break;
     case 1:
-        turnOn_LaunchpadLED2Green();
+        turnOn_LaunchpadLED2Green(); // green led on
         turnOff_LaunchpadLED2Red();
         turnOff_LaunchpadLED2Blue();
         break;
     case 2:
-        turnOn_LaunchpadLED2Blue();
+        turnOn_LaunchpadLED2Blue();   // blue led on
         turnOff_LaunchpadLED2Green();
         turnOff_LaunchpadLED2Red();
         break;
     case 3:
-        turnOn_LaunchpadLED2Blue();
+        turnOn_LaunchpadLED2Blue();   // LEDs forms Magneta color
         turnOn_LaunchpadLED2Red();
         turnOff_LaunchpadLED2Green();
         break;
     case 4:
-        turnOn_LaunchpadLED2Green();
+        turnOn_LaunchpadLED2Green();  // LEDs forms yellow  color
         turnOn_LaunchpadLED2Red();
         turnOff_LaunchpadLED2Blue();
         break;
     case 5:
-        turnOn_LaunchpadLED2Blue();
+        turnOn_LaunchpadLED2Blue();   //  LEDs forms Cyan color
         turnOn_LaunchpadLED2Green();
         turnOff_LaunchpadLED2Red();
         break;
     case 6:
-        turnOn_LaunchpadLED2Blue();
+        turnOn_LaunchpadLED2Blue();   // LEDs forms white color
         turnOn_LaunchpadLED2Green();
         turnOn_LaunchpadLED2Red();
         break;
     case 7:
-        turnOff_LaunchpadLED2Blue();
+        turnOff_LaunchpadLED2Blue();  // LEDs are off
         turnOff_LaunchpadLED2Green();
         turnOff_LaunchpadLED2Red();
 
@@ -122,50 +122,51 @@ void changeLaunchpadLED2(unsigned int count0)
 
 // TODO: Maybe the value of a count variable to a color for the Boosterpack LED
 // This is essentially a copy of the previous function, using a different LED
+//
 void changeBoosterpackLED(unsigned int count1)
 {
-    switch (count1)
+    switch ((count1)%8)
     {
     case 0:
-        turnOn_BoosterpackLEDRed();
+        turnOn_BoosterpackLEDRed();  // turn red led on
         turnOff_BoosterpackLEDBlue();
         turnOff_BoosterpackLEDGreen();
 
         break;
     case 1:
-        turnOn_BoosterpackLEDBlue();
+        turnOn_BoosterpackLEDBlue(); // turn blue led on
         turnOff_BoosterpackLEDGreen();
         turnOff_BoosterpackLEDRed();
         break;
     case 2:
-        turnOn_BoosterpackLEDGreen();
+        turnOn_BoosterpackLEDGreen(); // turn green led on
         turnOff_BoosterpackLEDBlue();
         turnOff_BoosterpackLEDRed();
 
         break;
     case 3:
-        turnOn_BoosterpackLEDGreen();
+        turnOn_BoosterpackLEDGreen(); // LEDs forms Cyan color
         turnOn_BoosterpackLEDBlue();
         turnOff_BoosterpackLEDRed();
         break;
     case 4:
-        turnOn_BoosterpackLEDRed();
+        turnOn_BoosterpackLEDRed(); // LEDs forms yellow color
         turnOn_BoosterpackLEDGreen();
         turnOff_BoosterpackLEDBlue();
         break;
     case 5:
-        turnOn_BoosterpackLEDRed();
+        turnOn_BoosterpackLEDRed();   //LEDs forms Magneta color
         turnOn_BoosterpackLEDBlue();
         turnOff_BoosterpackLEDGreen();
         break;
     case 6:
         turnOn_BoosterpackLEDBlue();
-        turnOn_BoosterpackLEDGreen();
+        turnOn_BoosterpackLEDGreen(); //LEDs forms white color
         turnOn_BoosterpackLEDRed();
         break;
     case 7:
         turnOff_BoosterpackLEDBlue();
-        turnOff_BoosterpackLEDGreen();
+        turnOff_BoosterpackLEDGreen(); // LEDs off
         turnOff_BoosterpackLEDRed();
         break;
 
@@ -176,22 +177,20 @@ void changeBoosterpackLED(unsigned int count1)
 // The button state machine should return true or false to indicate a completed, debounced button press.
 bool fsmBoosterpackButtonS1(unsigned char buttonhistory)
 {
+    unsigned char first_state = 0xff;
     bool pressed = false;
-    static enum
-    {
-        up, down
-    } intial_state = up;
+    static enum{ up, down} intial_state = up;
     switch (intial_state)
     {
     case up:
-        if (buttonhistory == 0xff)
+        if (buttonhistory == first_state)
         {
             intial_state = down;
             pressed = true;
         }
         break;
     case down:
-        if (buttonhistory != 0xff)
+        if (buttonhistory != first_state)
         {
             intial_state = up;
             pressed = false;
