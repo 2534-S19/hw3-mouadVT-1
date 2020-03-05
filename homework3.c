@@ -196,8 +196,7 @@ bool fsmBoosterpackButtonS1(unsigned char buttonhistory)
             pressed = false;
         }
         break;
-
     }
-    buttonhistory = intial_state;
     return pressed;
+    buttonhistory = intial_state;
 }
